@@ -3,8 +3,8 @@
 
 import torch
 import torch.nn as nn
-from vgg11 import VGG11Encoder as VGE
-from layers import CustomDropout as CD
+from vgg11 import VGG11Encoder
+from layers import CustomDropout
 
 
 class VGG11Classifier(nn.Module):
@@ -19,17 +19,17 @@ class VGG11Classifier(nn.Module):
             dropout_p: Dropout probability for the classifier head.
         """
         
-        self.encoder = VGE(in_channels=in_channels , batch_norm=batch_norm)
+        self.encoder = VGG11Encoder(in_channels=in_channels , batch_norm=batch_norm)
 
         self.fc_block = nn.Sequential(
             nn.Flatten() , 
             nn.Linear(in_features=512 * 7 * 7 , out_features=4096) , 
             nn.ReLU(inplace=True) , 
-            CD(p=dropout_p) , 
+            CustomDropout(p=dropout_p) , 
 
             nn.Linear(4096 , 4096) , 
             nn.ReLU(inplace=True) , 
-            CD(p=dropout_p) ,
+            CustomDropout(p=dropout_p) ,
 
             nn.Linear(4096, num_classes) , 
         )

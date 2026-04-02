@@ -8,7 +8,7 @@ import torch.optim as optim
 import albumentations as A
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
-from models.classification import VGG11Classifier as VGGC
+from models.classification import VGG11Classifier
 
 transform = A.Compose([
     A.Resize(224 , 224),
@@ -49,7 +49,7 @@ def classifier(batch_norm:bool , dropout):
 
   # config = wandb.config 
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  model = VGGC(
+  model = VGG11Classifier(
     num_classes=37, 
     in_channels=3,
     dropout_p=dropout, 
