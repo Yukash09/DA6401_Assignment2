@@ -19,6 +19,8 @@ class VGG11Classifier(nn.Module):
             dropout_p: Dropout probability for the classifier head.
         """
         
+        super().__init__()
+
         self.encoder = VGG11Encoder(in_channels=in_channels , batch_norm=batch_norm)
 
         self.fc_block = nn.Sequential(
