@@ -69,8 +69,8 @@ class OxfordIIITPetDataset(Dataset):
             else:
                 xmin = 0.0 
                 ymin = 0.0 
-                xmax = 0.0 
-                ymax = 0.0
+                xmax = 1.0 
+                ymax = 1.0
 
             image_bbox.append([xmin , ymin , xmax , ymax]) 
 
