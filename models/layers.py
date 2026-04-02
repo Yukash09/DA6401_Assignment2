@@ -16,6 +16,8 @@ class CustomDropout(nn.Module):
         Args:
             p: Dropout probability.
         """
+
+        super().__init__()
         self.p = p
 
 
