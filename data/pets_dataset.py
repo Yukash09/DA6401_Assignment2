@@ -87,7 +87,10 @@ class OxfordIIITPetDataset(Dataset):
             augmented = self.transform(image=image , mask=segment ,  bboxes = [bbox] , class_labels=[id]) 
             image = augmented['image']
             segment = augmented['mask']
-            bbox = augmented['bboxes'][0] 
+            if len(augmented['bboxes']) > 0:
+                bbox = augmented['bboxes'][0] 
+            else:
+                bbox = [0.0 , 0.0 , 1.0 , 1.0]
 
         xmin , ymin , xmax , ymax= bbox 
         x_center = (xmin + xmax) / 2.0 
