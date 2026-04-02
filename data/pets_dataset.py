@@ -42,7 +42,7 @@ class OxfordIIITPetDataset(Dataset):
             species = int(inpt[2]) - 1
             breedid = int(inpt[3]) - 1
 
-            if not (os.path.exists(filename) and os.path.exists(segname) and os.path.exists(xmlname)):
+            if not (os.path.exists(filename) and os.path.exists(segname)):
                 continue 
 
             image_id.append(id)
@@ -56,14 +56,21 @@ class OxfordIIITPetDataset(Dataset):
             # segment = segment - 1 
             image_segment.append(segname)
 
-            tree = ET.parse(xmlname)
-            root = tree.getroot() 
-            bndbox = root.find('object').find('bndbox') # type: ignore
+            if os.path.exists(xmlname):
+                tree = ET.parse(xmlname)
+                root = tree.getroot() 
+                bndbox = root.find('object').find('bndbox') # type: ignore
 
-            xmin = float(bndbox.find('xmin').text) # type: ignore
-            xmax = float(bndbox.find('xmax').text) # type: ignore
-            ymin = float(bndbox.find('ymin').text) # type: ignore
-            ymax = float(bndbox.find('ymax').text) # type: ignore
+                xmin = float(bndbox.find('xmin').text) # type: ignore
+                xmax = float(bndbox.find('xmax').text) # type: ignore
+                ymin = float(bndbox.find('ymin').text) # type: ignore
+                ymax = float(bndbox.find('ymax').text) # type: ignore
+            
+            else:
+                xmin = 0.0 
+                ymin = 0.0 
+                xmax = 0.0 
+                ymax = 0.0
 
             image_bbox.append([xmin , ymin , xmax , ymax]) 
 
