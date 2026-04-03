@@ -127,7 +127,7 @@ def classifier(batch_norm:bool , dropout):
     if val_acc > best_acc:
       best_acc = val_acc 
       checkpoint = {
-        "state_dict": model.state_dict , 
+        "state_dict": model.state_dict() , 
         "epoch": epoch ,
         "best_metric": best_acc
       }
@@ -208,6 +208,6 @@ def localizer(batch_norm:bool , dropout):
 
 
 if __name__ == "__main__":
-  # classifier(batch_norm=True , dropout=0.5)
+  classifier(batch_norm=True , dropout=0.5)
   localizer(batch_norm=True , dropout=0.5)
 
