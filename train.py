@@ -71,8 +71,8 @@ def classifier(batch_norm:bool , dropout):
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
-  test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
+  test_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0001)
@@ -162,8 +162,8 @@ def localizer(batch_norm:bool , dropout):
 
     print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-    train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
-    val_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+    train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
+    val_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
 
     loss_fn = IoULoss() 
     optimizer = optim.Adam(model.parameters() , lr=0.0001)
@@ -241,8 +241,8 @@ def segmentation(batch_norm:bool , dropout):
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
-  val_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
+  val_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0001)
