@@ -103,7 +103,10 @@ class OxfordIIITPetDataset(Dataset):
 
         id_tensor = torch.tensor(id , dtype=torch.long)
         bbox_tensor = torch.tensor([x_center , y_center , width , height] , dtype = torch.float32)
-        segment_tensor = torch.tensor(segment , dtype = torch.long)
+        if isinstance(segment, torch.Tensor):
+            segment_tensor = segment.clone().detach().long()
+        else:
+            segment_tensor = torch.tensor(segment, dtype=torch.long)
 
         return image , id_tensor , bbox_tensor , segment_tensor 
     

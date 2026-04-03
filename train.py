@@ -1,6 +1,6 @@
 """Training entrypoint
 """
-import wandb
+# import wandb
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -60,12 +60,15 @@ def classifier(batch_norm:bool , dropout):
   train_loader = DataLoader(training_data , batch_size=32 , shuffle=True , num_workers=4)
 
   test_data = OxfordIIITPetDataset(isTrain=False, transform=test_transform)
-  test_loader = DataLoader(test_data , batch_size=32 , shuffle=True , num_workers=4)
+  test_loader = DataLoader(test_data , batch_size=32 , shuffle=False , num_workers=4)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0001)
+  optimizer = optim.Adam(model.parameters() , lr=0.0002)
+  scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
-  for epoch in range(25):
+  for epoch in range(40):
+
+    print(f"Epoch: {epoch}")
     model.train()
     epoch_loss = 0.0 
     total_img = 0 
@@ -92,6 +95,8 @@ def classifier(batch_norm:bool , dropout):
     train_accuracy = correct_class/total_img * 100 
     train_loss = epoch_loss / len(train_loader)
 
+    print(f"Train accuracy: {train_accuracy} , Train loss: {train_loss}")
+
     model.eval()
     val_loss = 0.0 
     correct_val = 0 
@@ -110,6 +115,8 @@ def classifier(batch_norm:bool , dropout):
 
     val_acc = correct_val / total_val * 100 
     val_loss = val_loss / len(test_loader)
+
+    scheduler.step(val_acc)
 
     print(f"Validation Loss: {val_loss:.4f} , Validation Accuracy: {val_acc:.2f}") 
 
