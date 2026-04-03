@@ -52,7 +52,7 @@ class IoULoss(nn.Module):
             torch.min(pred[3] , target[3]) 
         ]
 
-        intersection_area = max(0 , (int_box[2] - int_box[0]) * (int_box[3] - int_box[1]))
+        intersection_area = torch.clamp(int_box[2] - int_box[0] , min=0) * torch.clamp((int_box[3] - int_box[1]), min=0)
 
         pred_area = pred_boxes[: , 2] * pred_boxes[: , 3]
         target_area = target_boxes[: , 2] * target_boxes[: , 3]
