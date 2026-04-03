@@ -91,7 +91,14 @@ class VGG11Encoder(nn.Module):
 
         if return_features:
             # TODO: Need to return proper dict, idk what to do here.
-            return (layer13 , {})
+            return (layer13 , 
+                    {
+                        "skip_map1": layer1 , 
+                        "skip_map2": layer3 , 
+                        "skip_map3": layer6 , 
+                        "skip_map4": layer9 , 
+                        "skip_map5": layer12
+                    })
         
         return layer13
     

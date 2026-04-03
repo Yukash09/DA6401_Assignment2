@@ -170,7 +170,7 @@ def localizer(batch_norm:bool , dropout):
       for idx , (images , ids , bboxs , segments) in enumerate(train_loader):
         # images , bboxs = images.to(device) , bboxs.to(device)
         images = images.to(device)
-        bboxs = (torch.stack(bboxs , dim=1).float()).to(device)
+        bboxs = (bboxs.float()).to(device)
         output = model(images)
         loss = loss_fn(output , bboxs)
 
@@ -194,7 +194,7 @@ def localizer(batch_norm:bool , dropout):
         for images , ids , bboxs , segments in val_loader:
           # images , bboxs = images.to(device) , bboxs.to(device)
           images = images.to(device)
-          bboxs = (torch.stack(bboxs , dim=1).float()).to(device)
+          bboxs = (bboxs.float()).to(device)
           output = model(images)
           loss = loss_fn(output , bboxs)
           val_loss += loss.item()
@@ -208,6 +208,6 @@ def localizer(batch_norm:bool , dropout):
 
 
 if __name__ == "__main__":
-  classifier(batch_norm=True , dropout=0.5)
+  # classifier(batch_norm=True , dropout=0.5)
   localizer(batch_norm=True , dropout=0.5)
 

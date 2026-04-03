@@ -3,6 +3,7 @@
 
 import torch
 import torch.nn as nn
+from models.vgg11 import VGG11Encoder as VGGE
 
 class VGG11UNet(nn.Module):
     """U-Net style segmentation network.
@@ -17,7 +18,12 @@ class VGG11UNet(nn.Module):
             in_channels: Number of input channels.
             dropout_p: Dropout probability for the segmentation head.
         """
-        pass
+        
+        super().__init__()
+
+        self.encoder = VGGE(in_channels=in_channels , batch_norm=True)
+
+        
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass for segmentation model.
