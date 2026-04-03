@@ -1,4 +1,6 @@
 F1 score in train.py
 better augments in dataset for classification and hyperparamsweep
 Fix dataset anomalies
-wandb logging 
+wandb logging
+write down tensor outputs at each stage for verification (classifier , encoder , regression decoder and segmentation)
+transform is being applied for validation set also, need to do something. 

@@ -43,7 +43,7 @@ class OxfordIIITPetDataset(Dataset):
             species = int(inpt[2]) - 1
             breedid = int(inpt[3]) - 1
 
-            if not (os.path.exists(filename) and os.path.exists(segname)):
+            if not (os.path.exists(filename) and os.path.exists(segname) and os.path.exists(xmlname)):
                 continue 
 
             image_id.append(id)
