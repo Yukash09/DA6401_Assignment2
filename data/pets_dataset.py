@@ -34,6 +34,7 @@ class OxfordIIITPetDataset(Dataset):
         image_bbox = []
         
         for line in inpt_file:
+            
             inpt = line.split()
             filename = "./data/dataset/images/" + inpt[0] + ".jpg"
             segname = "./data/dataset/annotations/trimaps/" + inpt[0] + ".png"

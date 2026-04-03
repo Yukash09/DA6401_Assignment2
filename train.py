@@ -57,14 +57,16 @@ def classifier(batch_norm:bool , dropout):
   ).to(device)
 
   training_data = OxfordIIITPetDataset(isTrain=True , transform=transform) 
-  train_loader = DataLoader(training_data , batch_size=32 , shuffle=True , num_workers=4)
+  train_loader = DataLoader(training_data , batch_size=16 , shuffle=True , num_workers=4)
 
   test_data = OxfordIIITPetDataset(isTrain=False, transform=test_transform)
-  test_loader = DataLoader(test_data , batch_size=32 , shuffle=False , num_workers=4)
+  test_loader = DataLoader(test_data , batch_size=16 , shuffle=False , num_workers=4)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0002)
+  optimizer = optim.Adam(model.parameters() , lr=0.0001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
+
+  best_acc = 0.0 
 
   for epoch in range(40):
 
@@ -119,6 +121,16 @@ def classifier(batch_norm:bool , dropout):
     scheduler.step(val_acc)
 
     print(f"Validation Loss: {val_loss:.4f} , Validation Accuracy: {val_acc:.2f}") 
+
+    if val_acc > best_acc:
+      best_acc = val_acc 
+      checkpoint = {
+        "state_dict": model.state_dict , 
+        "epoch": epoch ,
+        "best_metric": best_acc
+      }
+      torch.save(checkpoint , "classifier.pth")
+      torch.save(model.encoder.state_dict() , "vgg11_encoder.pth")
 
 
 if __name__ == "__main__":
