@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader , random_split
 import torch.optim as optim
+import copy
 import albumentations as A
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
@@ -60,10 +61,18 @@ def classifier(batch_norm:bool , dropout):
   ).to(device)
 
   training_data = OxfordIIITPetDataset(isTrain=True , transform=transform) 
-  train_loader = DataLoader(training_data , batch_size=16 , shuffle=True , num_workers=4)
+  # train_loader = DataLoader(training_data , batch_size=16 , shuffle=True , num_workers=4)
 
-  test_data = OxfordIIITPetDataset(isTrain=False, transform=test_transform)
-  test_loader = DataLoader(test_data , batch_size=16 , shuffle=False , num_workers=4)
+  # test_data = OxfordIIITPetDataset(isTrain=False, transform=test_transform)
+  # test_loader = DataLoader(test_data , batch_size=16 , shuffle=False , num_workers=4)
+
+  generator = torch.Generator().manual_seed(3)
+  train_data , val_data = random_split(training_data , [int(0.8*len(training_data)) , len(training_data) - int(0.8*len(training_data))] , generator)
+
+  print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
+
+  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
+  test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0001)
