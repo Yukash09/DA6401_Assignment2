@@ -208,6 +208,6 @@ def localizer(batch_norm:bool , dropout):
 
 
 if __name__ == "__main__":
-  classifier(batch_norm=True , dropout=0.5)
+  # classifier(batch_norm=True , dropout=0.5)
   localizer(batch_norm=True , dropout=0.5)
 

@@ -53,7 +53,7 @@ class VGG11Localizer(nn.Module):
         return scaled_output
     
     def load_pth(self , checkpoint:str , device:torch.device):
-        checkpoint_dict = torch.load(checkpoint , map_location=device)
+        checkpoint_dict = torch.load(checkpoint , map_location=device , weights_only=False)
         weights = checkpoint_dict.get("state_dict") 
 
         enc_weights = {}
