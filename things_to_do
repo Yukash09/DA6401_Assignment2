@@ -1,3 +1,4 @@
-F1 score in train.py 
+F1 score in train.py
+better augments in dataset for classification and hyperparamsweep
 Fix dataset anomalies
 wandb logging 

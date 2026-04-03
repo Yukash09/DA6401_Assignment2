@@ -94,3 +94,8 @@ class VGG11Encoder(nn.Module):
             return (layer13 , {})
         
         return layer13
+    
+
+
+
+

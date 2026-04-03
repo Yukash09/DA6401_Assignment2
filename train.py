@@ -3,12 +3,14 @@
 # import wandb
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader , random_split
 import torch.optim as optim
 import albumentations as A
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
-from models.classification import VGG11Classifier
+from models.classification import VGG11Classifier as VGGC
+from models.localization import VGG11Localizer as VGGL
+from losses.iou_loss import IoULoss
 
 transform = A.Compose([
     A.Resize(224 , 224),
@@ -49,7 +51,7 @@ def classifier(batch_norm:bool , dropout):
 
   # config = wandb.config 
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  model = VGG11Classifier(
+  model = VGGC(
     num_classes=37, 
     in_channels=3,
     dropout_p=dropout, 
@@ -129,10 +131,83 @@ def classifier(batch_norm:bool , dropout):
         "epoch": epoch ,
         "best_metric": best_acc
       }
-      torch.save(checkpoint , "classifier.pth")
-      torch.save(model.encoder.state_dict() , "vgg11_encoder.pth")
+      torch.save(checkpoint , "./checkpoints/classifier.pth")
+      torch.save(model.encoder.state_dict() , "./checkpoints/vgg11_encoder.pth")
+
+def localizer(batch_norm:bool , dropout):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = VGGL(
+      in_channels=3,
+      dropout_p=0.5
+    ).to(device)
+
+    model.load_pth("./checkpoints/classifier.pth" , device)
+
+    training_data = OxfordIIITPetDataset(isTrain=True , transform=transform)
+
+    # train_data = training_data[:int(0.8*len(training_data))]
+    # val_data = training_data[int(0.8*len(training_data)):]
+
+    train_data , val_data = random_split(training_data , [int(0.8*len(training_data)) , len(training_data) - int(0.8*len(training_data))])
+
+    print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
+
+    train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
+    val_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+
+    loss_fn = IoULoss() 
+    optimizer = optim.Adam(model.parameters() , lr=0.0001)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
+
+    best_loss = 1e18 
+
+    for epoch in range(40):
+
+      print(f"Epoch: {epoch}") 
+      model.train()
+      epoch_loss = 0.0 
+      
+      for idx , (images , ids , bboxs , segments) in enumerate(train_loader):
+        # images , bboxs = images.to(device) , bboxs.to(device)
+        images = images.to(device)
+        bboxs = (torch.stack(bboxs , dim=1).float()).to(device)
+        output = model(images)
+        loss = loss_fn(output , bboxs)
+
+        optimizer.zero_grad()
+        loss.backward() 
+        optimizer.step()
+
+        epoch_loss += loss.item()
+
+        if (idx + 1)%20 == 0:
+          print(f"Batch {idx + 1}/{len(train_loader)} , Loss: {loss.item():.4f}")
+
+      train_loss = epoch_loss / len(train_loader)
+
+      print(f"Train Loss: {train_loss}")
+
+      model.eval()
+      val_loss = 0.0 
+
+      with torch.no_grad():
+        for images , ids , bboxs , segments in val_loader:
+          # images , bboxs = images.to(device) , bboxs.to(device)
+          images = images.to(device)
+          bboxs = (torch.stack(bboxs , dim=1).float()).to(device)
+          output = model(images)
+          loss = loss_fn(output , bboxs)
+          val_loss += loss.item()
+
+
+      val_loss = val_loss / len(val_loader)
+      scheduler.step(val_loss)
+
+      print(f"Validation Loss: {val_loss:.4f}")
+
 
 
 if __name__ == "__main__":
   classifier(batch_norm=True , dropout=0.5)
+  localizer(batch_norm=True , dropout=0.5)
 
