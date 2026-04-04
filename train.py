@@ -5,7 +5,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader , random_split
 import torch.optim as optim
-import copy
+# import copy
+import gc
 import albumentations as A
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
@@ -71,8 +72,8 @@ def classifier(batch_norm:bool , dropout):
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
-  test_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
+  test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0001)
@@ -80,7 +81,7 @@ def classifier(batch_norm:bool , dropout):
 
   best_acc = 0.0 
 
-  for epoch in range(40):
+  for epoch in range(25):
 
     print(f"Epoch: {epoch}")
     model.train()
@@ -162,8 +163,8 @@ def localizer(batch_norm:bool , dropout):
 
     print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-    train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
-    val_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
+    train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
+    val_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
     loss_fn = IoULoss() 
     optimizer = optim.Adam(model.parameters() , lr=0.0001)
@@ -171,7 +172,7 @@ def localizer(batch_norm:bool , dropout):
 
     best_loss = 1e18 
 
-    for epoch in range(40):
+    for epoch in range(25):
 
       print(f"Epoch: {epoch}") 
       model.train()
@@ -241,8 +242,8 @@ def segmentation(batch_norm:bool , dropout):
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
-  val_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=8 , shuffle=True)
+  val_loader = DataLoader(val_data , batch_size=8 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0001)
@@ -250,7 +251,7 @@ def segmentation(batch_norm:bool , dropout):
 
   best_dice = 0.0 
 
-  for epoch in range(40):
+  for epoch in range(25):
     
     print(f"Epoch: {epoch}")
     model.train()
@@ -360,6 +361,10 @@ def dice_score(predictions:torch.Tensor , ground:torch.Tensor , num_classes) -> 
 
 if __name__ == "__main__":
   classifier(batch_norm=True , dropout=0.5)
+  gc.collect()
+  torch.cuda.empty_cache()
   localizer(batch_norm=True , dropout=0.5)
+  gc.collect()
+  torch.cuda.empty_cache()
   segmentation(batch_norm=True , dropout=0.5)
 
