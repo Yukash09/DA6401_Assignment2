@@ -3,6 +3,7 @@
 
 import torch
 import torch.nn as nn
+import gdown
 from models.classification import VGG11Classifier as VGGC
 from models.localization import VGG11Localizer as VGGL
 from models.segmentation import VGG11UNet as VGGU
@@ -23,7 +24,12 @@ class MultiTaskPerceptionModel(nn.Module):
         """
         
         super().__init__()
-
+        # classifier_link = "https://drive.google.com/file/d/1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq/view?usp=drive_link"
+        # localizer_link = "https://drive.google.com/file/d/11k3y9wu_DsX-OW0QbpTxUX4a2wxTfCvt/view?usp=drive_link"
+        # unet_link = "https://drive.google.com/file/d/1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW/view?usp=drive_link"
+        gdown.download(id="1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq" , output=classifier_path)
+        gdown.download(id="11k3y9wu_DsX-OW0QbpTxUX4a2wxTfCvt" , output=localizer_path)
+        gdown.download(id="1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW" , output=unet_path)
         self.classifier = VGGC(num_classes=num_breeds , in_channels=in_channels)
         self.localizer = VGGL(in_channels=in_channels)
         self.segmentation = VGGU(num_classes=seg_classes , in_channels=in_channels)
@@ -59,5 +65,5 @@ class MultiTaskPerceptionModel(nn.Module):
             'localization': localizer_output,
             'segmentation': segmentation_output
         }
-        
+
         return output_dict
