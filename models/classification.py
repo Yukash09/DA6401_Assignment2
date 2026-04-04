@@ -22,8 +22,11 @@ class VGG11Classifier(nn.Module):
         super().__init__()
 
         self.encoder = VGGE(in_channels=in_channels , batch_norm=batch_norm)
+        
+        self.fc_block = self.class_head(dropout_p=dropout_p , num_classes=num_classes)
 
-        self.fc_block = nn.Sequential(
+    def class_head(self , dropout_p , num_classes):
+        return nn.Sequential(
             nn.Flatten() , 
             nn.Linear(in_features=512 * 7 * 7 , out_features=4096) , 
             nn.ReLU(inplace=True) , 

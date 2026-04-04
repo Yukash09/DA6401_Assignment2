@@ -75,24 +75,9 @@ class VGG11UNet(nn.Module):
                 nn.ReLU(inplace=True)
                 )
         
-        return block
-
-
-
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass for segmentation model.
-        Args:
-            x: Input tensor of shape [B, in_channels, H, W].
-
-        Returns:
-            Segmentation logits [B, num_classes, H, W].
-        """
-        # TODO: Implement forward pass.
-        # raise NotImplementedError("Implement VGG11UNet.forward")
-
-        enc_output , skip_maps = self.encoder(x , return_features=True)
-
+        return block  
+    
+    def split_forward(self , skip_maps , enc_output):
         rev_layer1 = self.up_conv_block1(enc_output)
         rev_layer2_1 = self.conv_block1_1(torch.cat([rev_layer1 , skip_maps["skip_map5"]] , dim=1))
         rev_layer2_2 = self.conv_block1_2(rev_layer2_1) 
@@ -114,6 +99,24 @@ class VGG11UNet(nn.Module):
         rev_layer10_2 = self.conv_block_5_2(rev_layer10_1) 
 
         logits = self.up_conv_block6(rev_layer10_2)
+
+        return logits
+
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass for segmentation model.
+        Args:
+            x: Input tensor of shape [B, in_channels, H, W].
+
+        Returns:
+            Segmentation logits [B, num_classes, H, W].
+        """
+        # TODO: Implement forward pass.
+        # raise NotImplementedError("Implement VGG11UNet.forward")
+
+        enc_output , skip_maps = self.encoder(x , return_features=True)
+
+        logits = self.split_forward(skip_maps=skip_maps , enc_output=enc_output)
 
         return logits
 

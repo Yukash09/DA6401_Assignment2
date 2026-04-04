@@ -21,7 +21,10 @@ class VGG11Localizer(nn.Module):
         super().__init__()
         self.encoder = VGGE(in_channels=in_channels , batch_norm=True)
 
-        self.regression_decoder = nn.Sequential(
+        self.regression_decoder = self.local_head(dropout_p=dropout_p)
+
+    def local_head(self , dropout_p):
+        return nn.Sequential(
             nn.Flatten() , 
             nn.Linear(512 * 7 * 7 , 4096) , 
             nn.ReLU(inplace=True) , 
