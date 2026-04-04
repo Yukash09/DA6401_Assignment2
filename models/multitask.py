@@ -30,7 +30,7 @@ class MultiTaskPerceptionModel(nn.Module):
         gdown.download(id="1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq" , output=classifier_path)
         gdown.download(id="11k3y9wu_DsX-OW0QbpTxUX4a2wxTfCvt" , output=localizer_path)
         gdown.download(id="1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW" , output=unet_path)
-        self.classifier = VGGC(num_classes=num_breeds , in_channels=in_channels)
+        self.classifier = VGGC(num_classes=num_breeds , in_channels=in_channels , batch_norm=True)
         self.localizer = VGGL(in_channels=in_channels)
         self.segmentation = VGGU(num_classes=seg_classes , in_channels=in_channels)
 
