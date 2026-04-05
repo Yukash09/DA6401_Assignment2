@@ -40,7 +40,7 @@ class MultiTaskPerceptionModel(nn.Module):
         self.localizer.load_state_dict(torch.load(localizer_path , map_location=device , weights_only=False)['state_dict'])
         self.segmentation.load_state_dict(torch.load(unet_path , map_location=device , weights_only=False)['state_dict'])
 
-        self.encoder = self.classifier.encoder
+        self.encoder = self.localizer.encoder
 
     def forward(self, x: torch.Tensor):
         """Forward pass for multi-task model.
