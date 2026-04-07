@@ -61,7 +61,7 @@ def classifier(batch_norm:bool , dropout):
     batch_norm=batch_norm
   ).to(device)
 
-  training_data = OxfordIIITPetDataset(isTrain=True , transform=transform) 
+  training_data = OxfordIIITPetDataset(isTrain=False , transform=transform) 
   # train_loader = DataLoader(training_data , batch_size=16 , shuffle=True , num_workers=4)
 
   # test_data = OxfordIIITPetDataset(isTrain=False, transform=test_transform)
@@ -153,6 +153,9 @@ def localizer(batch_norm:bool , dropout):
 
     model.load_pth("./checkpoints/classifier.pth" , device)
 
+    for param in model.encoder.parameters():
+      param.requires_grad = False
+
     training_data = OxfordIIITPetDataset(isTrain=True , transform=transform)
 
     # train_data = training_data[:int(0.8*len(training_data))]
@@ -167,7 +170,8 @@ def localizer(batch_norm:bool , dropout):
     val_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
     loss_fn = IoULoss() 
-    optimizer = optim.Adam(model.parameters() , lr=0.0001)
+    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+    optimizer = optim.Adam(trainable_params, lr=0.0001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
     best_loss = 1e18 
@@ -234,8 +238,10 @@ def segmentation(batch_norm:bool , dropout):
   ).to(device)
 
   model.load_pth("./checkpoints/classifier.pth" , device)
+  for param in model.encoder.parameters():
+    param.requires_grad = False
 
-  training_data = OxfordIIITPetDataset(isTrain=True , transform=transform)
+  training_data = OxfordIIITPetDataset(isTrain=False , transform=transform)
 
   generator = torch.Generator().manual_seed(3)
   train_data , val_data = random_split(training_data , [int(0.8*len(training_data)) , len(training_data) - int(0.8*len(training_data))] , generator)
@@ -246,7 +252,8 @@ def segmentation(batch_norm:bool , dropout):
   val_loader = DataLoader(val_data , batch_size=8 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0001)
+  trainable_params = filter(lambda p: p.requires_grad, model.parameters())
+  optimizer = optim.Adam(trainable_params, lr=0.0001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_dice = 0.0 
