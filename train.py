@@ -78,7 +78,7 @@ def classifier(batch_norm:bool , dropout):
   test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.AdamW(model.parameters() , lr=0.0003 , weight_decay=0.0001)
+  optimizer = optim.Adam(model.parameters() , lr=0.0003)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_acc = 0.0 
@@ -173,7 +173,7 @@ def localizer(batch_norm:bool , dropout):
 
     loss_fn = IoULoss() 
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = optim.AdamW(trainable_params, lr=0.0003, weight_decay=0.0001)
+    optimizer = optim.Adam(trainable_params, lr=0.0003)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
     best_loss = 1e18 
@@ -255,7 +255,7 @@ def segmentation(batch_norm:bool , dropout):
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.AdamW(trainable_params, lr=0.0003, weight_decay=0.0001)
+  optimizer = optim.Adam(trainable_params, lr=0.0003)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_dice = 0.0 
