@@ -17,10 +17,11 @@ class OxfordIIITPetDataset(Dataset):
         # self.bounding_box = "./dataset/annotations/xmls"     
 
         self.transform = transform
+        self.isTrain = isTrain
         file = open("./data/dataset/annotations/trainval.txt")
 
         if not isTrain:
-            file = open("./data/dataset/annotations/test.txt")
+            file = open("./data/dataset/annotations/list.txt")
   
         self.image_set , self.image_id , self.image_bbox , self.image_segment = self.load(file)
 
@@ -34,6 +35,9 @@ class OxfordIIITPetDataset(Dataset):
         image_bbox = []
         
         for line in inpt_file:
+            if not self.isTrain:
+                if line.startswith('#'):
+                    continue
             
             inpt = line.split()
             filename = "./data/dataset/images/" + inpt[0] + ".jpg"
@@ -43,8 +47,14 @@ class OxfordIIITPetDataset(Dataset):
             species = int(inpt[2]) - 1
             breedid = int(inpt[3]) - 1
 
-            if not (os.path.exists(filename) and os.path.exists(segname) and os.path.exists(xmlname)):
-                continue 
+
+            if self.isTrain:
+                if not (os.path.exists(filename) and os.path.exists(segname) and os.path.exists(xmlname)):
+                    continue
+
+            else:
+                if not (os.path.exists(filename) and os.path.exists(segname)):
+                    continue 
 
             image_id.append(id)
             train_species.append(species)
