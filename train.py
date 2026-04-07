@@ -365,6 +365,9 @@ def dice_score(predictions:torch.Tensor , ground:torch.Tensor , num_classes) -> 
   return torch.stack(dice_scores).mean()
 
 
+def hyperparamsweep():
+
+
 
 if __name__ == "__main__":
   classifier(batch_norm=True , dropout=0.5)
