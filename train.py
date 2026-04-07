@@ -25,7 +25,7 @@ transform = A.Compose([
         p=0.5
     ),
     A.RandomBrightnessContrast(),
-    A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1, p=0.5),
+    # A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1, p=0.5),
     # A.CoarseDropout(max_holes=8, max_height=16, max_width=16, p=0.3),
     A.Normalize(),
     ToTensorV2()
@@ -83,7 +83,7 @@ def classifier(batch_norm:bool , dropout):
 
   best_acc = 0.0 
 
-  for epoch in range(25):
+  for epoch in range(35):
 
     print(f"Epoch: {epoch}")
     model.train()
@@ -178,7 +178,7 @@ def localizer(batch_norm:bool , dropout):
 
     best_loss = 1e18 
 
-    for epoch in range(25):
+    for epoch in range(35):
 
       print(f"Epoch: {epoch}") 
       model.train()
@@ -260,7 +260,7 @@ def segmentation(batch_norm:bool , dropout):
 
   best_dice = 0.0 
 
-  for epoch in range(25):
+  for epoch in range(35):
     
     print(f"Epoch: {epoch}")
     model.train()
