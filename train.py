@@ -25,6 +25,8 @@ transform = A.Compose([
         p=0.5
     ),
     A.RandomBrightnessContrast(),
+    A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1, p=0.5),
+    # A.CoarseDropout(max_holes=8, max_height=16, max_width=16, p=0.3),
     A.Normalize(),
     ToTensorV2()
 ] , bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
@@ -76,7 +78,7 @@ def classifier(batch_norm:bool , dropout):
   test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0001)
+  optimizer = optim.AdamW(model.parameters() , lr=0.0003 , weight_decay=0.01)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_acc = 0.0 
@@ -171,7 +173,7 @@ def localizer(batch_norm:bool , dropout):
 
     loss_fn = IoULoss() 
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = optim.Adam(trainable_params, lr=0.0001)
+    optimizer = optim.AdamW(trainable_params, lr=0.0003, weight_decay=0.01)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
     best_loss = 1e18 
@@ -253,7 +255,7 @@ def segmentation(batch_norm:bool , dropout):
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.Adam(trainable_params, lr=0.0001)
+  optimizer = optim.AdamW(trainable_params, lr=0.0003, weight_decay=0.01)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_dice = 0.0 
@@ -365,8 +367,7 @@ def dice_score(predictions:torch.Tensor , ground:torch.Tensor , num_classes) -> 
   return torch.stack(dice_scores).mean()
 
 
-def hyperparamsweep():
-
+# def hyperparamsweep():
 
 
 if __name__ == "__main__":
