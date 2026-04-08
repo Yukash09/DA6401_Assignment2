@@ -83,7 +83,7 @@ def classifier(batch_norm:bool , dropout):
 
   best_acc = 0.0 
 
-  for epoch in range(40):
+  for epoch in range(50):
 
     print(f"Epoch: {epoch}")
     model.train()
@@ -178,7 +178,7 @@ def localizer(batch_norm:bool , dropout):
 
     best_loss = 1e18 
 
-    for epoch in range(40):
+    for epoch in range(50):
 
       print(f"Epoch: {epoch}") 
       model.train()
@@ -260,7 +260,7 @@ def segmentation(batch_norm:bool , dropout):
 
   best_dice = 0.0 
 
-  for epoch in range(40):
+  for epoch in range(50):
     
     print(f"Epoch: {epoch}")
     model.train()
@@ -374,8 +374,8 @@ if __name__ == "__main__":
   classifier(batch_norm=True , dropout=0.5)
   gc.collect()
   torch.cuda.empty_cache()
-  localizer(batch_norm=True , dropout=0.5)
-  gc.collect()
-  torch.cuda.empty_cache()
-  segmentation(batch_norm=True , dropout=0.5)
+  # localizer(batch_norm=True , dropout=0.5)
+  # gc.collect()
+  # torch.cuda.empty_cache()
+  # segmentation(batch_norm=True , dropout=0.5)
 
