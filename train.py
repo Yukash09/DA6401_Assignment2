@@ -3,12 +3,15 @@
 # import wandb
 import torch
 import torch.nn as nn
+import torchvision.utils
 from torch.utils.data import DataLoader , random_split
 import torch.optim as optim
+from PIL import Image
 # import copy
 import gc
 import albumentations as A
 import wandb
+import numpy as np
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
 from models.classification import VGG11Classifier as VGGC
@@ -232,7 +235,6 @@ def localizer(batch_norm:bool , dropout):
 
       print(f"Validation Loss: {val_loss:.4f}")
 
-
 def segmentation(batch_norm:bool , dropout):
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   model = VGGU(
@@ -336,7 +338,6 @@ def segmentation(batch_norm:bool , dropout):
       }
       torch.save(checkpoint , "./checkpoints/unet.pth")
 
-
 def dice_score(predictions:torch.Tensor , ground:torch.Tensor , num_classes) -> torch.Tensor:
 
   dice_scores : list[torch.Tensor] = []
@@ -366,7 +367,6 @@ def dice_score(predictions:torch.Tensor , ground:torch.Tensor , num_classes) -> 
     dice_scores.append(dice)
   
   return torch.stack(dice_scores).mean()
-
 
 sweep_config1 ={
   'method': 'grid',
@@ -606,7 +606,6 @@ def q2_2():
   gc.collect()
   torch.cuda.empty_cache()
 
-
 sweep_config3 = {
   'method': 'grid',
   'metric': {'goal': 'maximize'} ,
@@ -742,8 +741,8 @@ def q2_3():
   gc.collect()
   torch.cuda.empty_cache()
 
-
 def q2_4():
+  wandb.init(project="DA6401_Assignment2")
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
   model = VGGC(
@@ -757,23 +756,234 @@ def q2_4():
 
   model.eval()
 
+  feature_maps = {}
+  def get_features(name):
+    def hook(m , i , o):
+      feature_maps[name] = o.detach()
+    return hook
   
+  hook_first = model.encoder.conv_block1.register_forward_hook(get_features('first_layer'))
+  hook_last = model.encoder.conv_block8.register_forward_hook(get_features('last_layer'))
 
+  image_dest = "./data/dataset/images/basset_hound_19.jpg"
+  img = Image.open(image_dest).convert('RGB')
+
+  transform = A.Compose([
+    A.Resize(224 , 224),
+    A.Normalize(),
+    ToTensorV2()
+  ])
+
+  inpt = transform(image=np.array(img))['image'].unsqueeze(0).to(device)
+
+  with torch.no_grad():
+    model(inpt)
+
+  hook_first.remove()
+  hook_last.remove()
+
+  channels1 = (feature_maps['first_layer'][0 , :16 , : , :].cpu()).unsqueeze(1)
+  channels2 = (feature_maps['second_layer'][0 , :16 , : , :].cpu()).unsqueeze(1)
+
+  img1 = wandb.Image(torchvision.utils.make_grid(channels1 , nrow=4 , normalize=True, scale_each=True))
+
+  img2 = wandb.Image(torchvision.utils.make_grid(channels2 , nrow=4 , normalize=True, scale_each=True))
+
+  orgimg = wandb.Image(img)
+  wandb.log({
+    "Input": orgimg ,
+    "First layer": img1 ,
+    "Last layer": img2
+  })
+
+  wandb.finish() 
+
+def q2_5():
+  wandb.init(project="DA6401_Assignment2")
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+  model1 = VGGC(
+    num_classes=37,
+    in_channels=3,
+    dropout_p=0.5,
+    batch_norm=True
+  ).to(device)
+
+  model2 = VGGL(
+    in_channels=3,
+    dropout_p=0.5
+  ).to(device)
+
+  model1.load_state_dict(torch.load("./checkpoints/classifier.pth" , map_location=device , weights_only=False)['state_dict'])
+  model2.load_state_dict(torch.load("./checkpoints/localizer.pth" , map_location=device , weights_only=False)['state_dict'])
+
+  model1.eval()
+  model2.eval()
+
+  training_data = OxfordIIITPetDataset(isTrain=True , transform=test_transform)
+
+  # train_data = training_data[:int(0.8*len(training_data))]
+  # val_data = training_data[int(0.8*len(training_data)):]
+
+  generator = torch.Generator().manual_seed(3)
+  train_data , val_data = random_split(training_data , [int(0.8*len(training_data)) , len(training_data) - int(0.8*len(training_data))] , generator)
+
+  val_loader = DataLoader(val_data , batch_size=1 , shuffle=False)
+  loss_fn = IoULoss()
+
+  columns = ["Image" , "Confidence Score" , "IoU Score"]
+  table = wandb.Table(columns=columns)
+
+  with torch.no_grad():
+    for count , (images , ids , bboxs , segments) in enumerate(val_loader):
+      if count >= 10:
+        break 
+
+      images , ids = images.to(device) , ids.to(device)
+      bboxs = (bboxs.float()).to(device)
+      logits = model1(images)
+      output_boxes = model2(images)
+
+      pred_box = output_boxes[0].cpu().numpy()
+      target_box = bboxs[0].cpu().numpy()
+
+      confidence = torch.max(torch.softmax(logits , dim=1)[0]).item()
+
+      loss = loss_fn(output_boxes , bboxs)
+      iou = (1 - loss).item()
+
+      act_img = images[0].cpu().permute(1,2,0).numpy()
+      rev_norm = (act_img * np.array([0.229 , 0.224 , 0.225]) + np.array([0.485 , 0.456 , 0.406])).clip(0 , 1)
+      
+      # func  lambda cx , cy , w , h:  
+
+      def func(cx , cy , w, h):
+        return {
+        "minX": float(cx - w/2) , 
+        "maxX": float(cx + w/2) ,
+        "minY": float(cy - h/2) ,
+        "maxY": float(cy + h/2)
+      }
+
+
+      wb_img = wandb.Image(
+        rev_norm,
+        boxes={
+          "predictions:":{
+            "box_data":[
+              {
+                "position": func(pred_box[0] , pred_box[1] , pred_box[2] , pred_box[3]) , 
+                "class_id": 0 , 
+                "box_caption": f"Pred, IoU:{iou:.2f}"               
+              }
+            ] , 
+            "class_labels":{0: "Prediction"}
+          } , 
+          "ground": {
+            "box_data":[
+              {
+                "position": func(target_box[0] , target_box[1] , target_box[2] , target_box[3]) , 
+                "class_id": 1 ,
+                "box_caption": "Ground"
+              }
+            ]
+          }
+        }
+      )
+
+      table.add_data(wb_img)
+  wandb.log({"Object Detection Table": table})
+
+def q2_6():
+  wandb.init(project="DA6401_Assignment2") 
+
+  class_labels = {0: "Foreground" , 1: "Background" , 2:"Not Classified"}
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+  # model1 = VGGC(
+  #   num_classes=37,
+  #   in_channels=3,
+  #   dropout_p=0.5,
+  #   batch_norm=True
+  # ).to(device)
+
+  # model1.load_state_dict(torch.load("./checkpoints/classifier.pth" , map_location=device , weights_only=False)['state_dict'])
+  # model1.eval()
+
+  model2 = VGGU(
+    num_classes=3,
+    in_channels=3,
+    dropout_p=0.5
+  ).to(device)
+
+  model2.load_state_dict(torch.load("./checkpoints/unet.pth" , map_location=device , weights_only=False)['state_dict'])
+  model2.eval()
+
+  training_data = OxfordIIITPetDataset(isTrain=True , transform=test_transform)
+
+  # train_data = training_data[:int(0.8*len(training_data))]
+  # val_data = training_data[int(0.8*len(training_data)):]
+
+  generator = torch.Generator().manual_seed(3)
+  train_data , val_data = random_split(training_data , [int(0.8*len(training_data)) , len(training_data) - int(0.8*len(training_data))] , generator)
+
+  val_loader = DataLoader(val_data , batch_size=5 , shuffle=False)
+
+  images , ids , bboxs , segments = next(iter(val_loader))
+
+  with torch.no_grad():
+    images , ids = images.to(device) , ids.to(device)
+    segments = segments.to(device)
+
+    # logits = model1(images)
+    output_seg = model2(images)
+
+  wandb_images = []
+
+  for index in range(5):
+    act_img = images[index].cpu().permute(1 , 2 , 0).numpy()
+    rev_norm = (act_img * np.array([0.229 , 0.224 , 0.225]) + np.array([0.485 , 0.456 , 0.406])).clip(0 , 1)
+
+    pred_segs = torch.argmax(output_seg , dim=1)[index].cpu().numpy()
+    ground_segs = segments[index].cpu().numpy()
+
+    wandb_mask = wandb.Image(
+      rev_norm, 
+      masks={
+        "predictions":{
+          "mask_data": pred_segs,
+          "class_labels": class_labels 
+        } ,
+        "ground":{
+          "mask_data": ground_segs,
+          "class_labels": class_labels
+        }
+      }
+    )
+
+    wandb_images.append(wandb_mask)
+
+  wandb.log({"Segmentation Evaluation": wandb_images})
+  wandb.finish()
 
 if __name__ == "__main__":
   # classifier(batch_norm=True , dropout=0.5)
   # gc.collect()
   # torch.cuda.empty_cache()
-  localizer(batch_norm=True , dropout=0.5)
-  gc.collect()
-  torch.cuda.empty_cache()
-  segmentation(batch_norm=True , dropout=0.5)
+  # localizer(batch_norm=True , dropout=0.5)
+  # gc.collect()
+  # torch.cuda.empty_cache()
+  # segmentation(batch_norm=True , dropout=0.5)
 
-  # sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
-  # wandb.agent(sweep_id , function=q2_1)
+  sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
+  wandb.agent(sweep_id , function=q2_1)
 
-  # sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
-  # wandb.agent(sweep_id , function=q2_2)
+  sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
+  wandb.agent(sweep_id , function=q2_2)
 
   sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
   wandb.agent(sweep_id , function=q2_3)
+
+  q2_4()
+  q2_5()
+  q2_6()
