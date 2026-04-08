@@ -78,12 +78,12 @@ def classifier(batch_norm:bool , dropout):
   test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0003)
+  optimizer = optim.Adam(model.parameters() , lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_acc = 0.0 
 
-  for epoch in range(35):
+  for epoch in range(40):
 
     print(f"Epoch: {epoch}")
     model.train()
@@ -173,12 +173,12 @@ def localizer(batch_norm:bool , dropout):
 
     loss_fn = IoULoss() 
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = optim.Adam(trainable_params, lr=0.0003)
+    optimizer = optim.Adam(trainable_params, lr=0.0002)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
     best_loss = 1e18 
 
-    for epoch in range(35):
+    for epoch in range(40):
 
       print(f"Epoch: {epoch}") 
       model.train()
@@ -255,12 +255,12 @@ def segmentation(batch_norm:bool , dropout):
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.Adam(trainable_params, lr=0.0003)
+  optimizer = optim.Adam(trainable_params, lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   best_dice = 0.0 
 
-  for epoch in range(35):
+  for epoch in range(40):
     
     print(f"Epoch: {epoch}")
     model.train()
