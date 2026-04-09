@@ -11,6 +11,7 @@ from PIL import Image
 import gc
 import albumentations as A
 import wandb
+import gdown
 import numpy as np
 from albumentations.pytorch import ToTensorV2 
 from data.pets_dataset import OxfordIIITPetDataset
@@ -419,7 +420,7 @@ def q2_1():
   test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0002)
+  optimizer = optim.Adam(model.parameters() , lr=0.001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_acc = 0.0 
@@ -496,7 +497,7 @@ def q2_1():
     model(sample_images.to(device))
     handle.remove()
 
-    flat_activations = activations[0].flatten()
+    flat_activations = activations[0][0].flatten()
 
     wandb.log({
       "Conv3 activations": wandb.Histogram(flat_activations)
@@ -535,7 +536,7 @@ def q2_2():
   test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0002)
+  optimizer = optim.Adam(model.parameters() , lr=0.001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_acc = 0.0 
@@ -625,7 +626,9 @@ def q2_3():
     dropout_p=0.5
   ).to(device)
 
-  model.load_pth("./checkpoints/classifier.pth" , device)
+
+  gdown.download(id="1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW" , output="./checkpoints/unet.pth") 
+  model.load_state_dict(torch.load("./checkpoints/unet.pth" , map_location=device , weights_only=False)['state_dict'])
   
   if config.approach == "strict":
     for param in model.encoder.parameters():
@@ -751,7 +754,7 @@ def q2_4():
     dropout_p=0.5,
     batch_norm=True
   ).to(device)
-
+  gdown.download(id="1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq" , output="./checkpoints/classifier.pth")
   model.load_state_dict(torch.load("./checkpoints/classifier.pth" , map_location=device , weights_only=False)['state_dict'] , strict=False)
 
   model.eval()
@@ -783,7 +786,7 @@ def q2_4():
   hook_last.remove()
 
   channels1 = (feature_maps['first_layer'][0 , :16 , : , :].cpu()).unsqueeze(1)
-  channels2 = (feature_maps['second_layer'][0 , :16 , : , :].cpu()).unsqueeze(1)
+  channels2 = (feature_maps['last_layer'][0 , :16 , : , :].cpu()).unsqueeze(1)
 
   img1 = wandb.Image(torchvision.utils.make_grid(channels1 , nrow=4 , normalize=True, scale_each=True))
 
@@ -813,7 +816,7 @@ def q2_5():
     in_channels=3,
     dropout_p=0.5
   ).to(device)
-
+  gdown.download(id="11k3y9wu_DsX-OW0QbpTxUX4a2wxTfCvt" , output="./checkpoints/localizer.pth")
   model1.load_state_dict(torch.load("./checkpoints/classifier.pth" , map_location=device , weights_only=False)['state_dict'])
   model2.load_state_dict(torch.load("./checkpoints/localizer.pth" , map_location=device , weights_only=False)['state_dict'])
 
@@ -891,7 +894,7 @@ def q2_5():
         }
       )
 
-      table.add_data(wb_img)
+      table.add_data(wb_img , confidence , iou)
   wandb.log({"Object Detection Table": table})
 
 def q2_6():
