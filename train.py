@@ -416,8 +416,8 @@ def q2_1():
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
-  test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=32 , shuffle=True)
+  test_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0005)
@@ -532,8 +532,8 @@ def q2_2():
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=16 , shuffle=True)
-  test_loader = DataLoader(val_data , batch_size=16 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=32 , shuffle=True)
+  test_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   optimizer = optim.Adam(model.parameters() , lr=0.0005)
@@ -654,8 +654,8 @@ def q2_3():
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=8 , shuffle=True)
-  val_loader = DataLoader(val_data , batch_size=8 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=32 , shuffle=True)
+  val_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
