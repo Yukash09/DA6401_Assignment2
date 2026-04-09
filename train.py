@@ -978,14 +978,14 @@ if __name__ == "__main__":
   # torch.cuda.empty_cache()
   # segmentation(batch_norm=True , dropout=0.5)
 
-  sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
-  wandb.agent(sweep_id , function=q2_1)
+  # sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
+  # wandb.agent(sweep_id , function=q2_1)
 
-  sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
-  wandb.agent(sweep_id , function=q2_2)
+  # sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
+  # wandb.agent(sweep_id , function=q2_2)
 
-  sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
-  wandb.agent(sweep_id , function=q2_3)
+  # sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
+  # wandb.agent(sweep_id , function=q2_3)
 
   q2_4()
   q2_5()
