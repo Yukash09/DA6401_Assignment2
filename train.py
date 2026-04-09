@@ -872,7 +872,7 @@ def q2_5():
       wb_img = wandb.Image(
         rev_norm,
         boxes={
-          "predictions:":{
+          "predictions":{
             "box_data":[
               {
                 "position": func(pred_box[0] , pred_box[1] , pred_box[2] , pred_box[3]) , 
@@ -889,7 +889,8 @@ def q2_5():
                 "class_id": 1 ,
                 "box_caption": "Ground"
               }
-            ]
+            ] , 
+            "class_labels":{1: "Ground"}
           }
         }
       )
@@ -918,7 +919,7 @@ def q2_6():
     in_channels=3,
     dropout_p=0.5
   ).to(device)
-
+  gdown.download(id="1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW" , output="./checkpoints/unet.pth") 
   model2.load_state_dict(torch.load("./checkpoints/unet.pth" , map_location=device , weights_only=False)['state_dict'])
   model2.eval()
 
