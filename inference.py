@@ -41,7 +41,7 @@ def inference():
         ToTensorV2()
     ])
 
-    columns = ["Image Name" , "Output" , "Prediction"]
+    columns = ["Image Name" , "Output" , "Prediction" , "Confidence"]
     table = wandb.Table(columns)
 
     img1 = "./data/q7/samoyed.jpeg"
