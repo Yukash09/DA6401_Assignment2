@@ -18,10 +18,31 @@ from data.pets_dataset import OxfordIIITPetDataset
 # from models.localization import VGG11Localizer as VGGL
 # from models.segmentation import VGG11UNet as VGGU
 from models.multitask import MultiTaskPerceptionModel as MultiTask
-from losses.iou_loss import IoULoss
+# from losses.iou_loss import IoULoss
+
+def mappesh():
+    file1 = open("./data/dataset/annotations/list.txt")
+    mapp = {}
+
+    for line in file1:
+        if line.startswith('#'):
+            continue 
+
+        arr = line.split()
+        name =  arr[0]
+        ids = int(arr[1]) - 1
+        onlyname = name.split('_') 
+        fullname = ""
+        for i in range(len(onlyname) - 1):
+            fullname += onlyname[i]
+
+        mapp[ids] = fullname 
+    
+    return mapp 
 
 def inference():
     wandb.init(project="DA6401_Assignment2")
+    mapp = mappesh()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = MultiTask(
@@ -49,19 +70,19 @@ def inference():
     img3 = "./data/q7/basset_hound.jpeg"
 
     with torch.no_grad():
-        wbimg1 , conf1 = inf_help(img1 , transform , device , model) 
-        wbimg2 , conf2 = inf_help(img2 , transform , device , model) 
-        wbimg3 , conf3 = inf_help(img3 , transform , device , model) 
+        wbimg1 , conf1 , pred1 = inf_help(img1 , transform , device , model , mapp) 
+        wbimg2 , conf2 , pred2 = inf_help(img2 , transform , device , model , mapp) 
+        wbimg3 , conf3 , pred3 = inf_help(img3 , transform , device , model , mapp) 
 
-        table.add_data("Samoyed" , wbimg1 , "Place Holder" , conf1.item())
-        table.add_data("Saint Bernard" , wbimg2 , "PlaceHolder" , conf2.item())
-        table.add_data("Basset Hound" , wbimg3 , "PlaceHolder" , conf3.item())
+        table.add_data("Samoyed" , wbimg1 , pred1 , conf1.item())
+        table.add_data("Saint Bernard" , wbimg2 , pred2 , conf2.item())
+        table.add_data("Basset Hound" , wbimg3 , pred3 , conf3.item())
 
     wandb.log({"Final Pipeline Showcase": table})
     wandb.finish()
 
 
-def inf_help(img , transform , device , model):
+def inf_help(img , transform , device , model , mapp):
     act_img = Image.open(img).convert('RGB').resize((224 , 224))
     base_array = np.array(act_img)
 
@@ -77,12 +98,14 @@ def inf_help(img , transform , device , model):
     cx , cy , w , h = bboxs[0] , bboxs[1] , bboxs[2] ,  bboxs[3]
     seg_preds = torch.argmax(seg_logits , dim=1)[0].cpu().numpy()
 
+    pred_name = mapp.get(preds.item() , f"Class {preds.item()}")
+
     def func(cx , cy , w, h):
         return {
-        "minX": float(cx - w/2) , 
-        "maxX": float(cx + w/2) ,
-        "minY": float(cy - h/2) ,
-        "maxY": float(cy + h/2)
+        "minX": float(cx - w/2)/224.0 , 
+        "maxX": float(cx + w/2)/224.0 ,
+        "minY": float(cy - h/2)/224.0 ,
+        "maxY": float(cy + h/2)/224.0
         }
 
     wb_img = wandb.Image(
@@ -93,10 +116,10 @@ def inf_help(img , transform , device , model):
                     {
                         "position": func(cx , cy , w , h) , 
                         "class_id": preds.item() , 
-                        "box_caption": "PlaceHolder"
+                        "box_caption": pred_name
                     }
                 ] , 
-                "class_labels":{preds.item(): "PlaceHolder"}
+                "class_labels":{preds.item(): pred_name}
             }
         },
         masks={
@@ -111,7 +134,7 @@ def inf_help(img , transform , device , model):
         }
     )
 
-    return wb_img , confidence
+    return wb_img , confidence , pred_name
 
 if __name__ == "__main__":
     inference()
