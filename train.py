@@ -817,6 +817,7 @@ def q2_5():
     dropout_p=0.5
   ).to(device)
   gdown.download(id="11k3y9wu_DsX-OW0QbpTxUX4a2wxTfCvt" , output="./checkpoints/localizer.pth")
+  gdown.download(id="1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq" , output="./checkpoints/classifier.pth")
   model1.load_state_dict(torch.load("./checkpoints/classifier.pth" , map_location=device , weights_only=False)['state_dict'])
   model2.load_state_dict(torch.load("./checkpoints/localizer.pth" , map_location=device , weights_only=False)['state_dict'])
 
