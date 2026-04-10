@@ -986,9 +986,9 @@ if __name__ == "__main__":
   # sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
   # wandb.agent(sweep_id , function=q2_2)
 
-  # sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
-  # wandb.agent(sweep_id , function=q2_3)
+  sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
+  wandb.agent(sweep_id , function=q2_3)
 
   # q2_4()
-  q2_5()
+  # q2_5()
   # q2_6()
