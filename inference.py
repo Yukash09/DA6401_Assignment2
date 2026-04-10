@@ -46,7 +46,7 @@ def inference():
 
     img1 = "./data/q7/samoyed.jpeg"
     img2 = "./data/q7/saint_bernard.jpeg"
-    img3 = "./basset_hound.jpeg"
+    img3 = "./data/q7/basset_hound.jpeg"
 
     with torch.no_grad():
         wbimg1 , conf1 = inf_help(img1 , transform , device , model) 
