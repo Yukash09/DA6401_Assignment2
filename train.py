@@ -862,10 +862,10 @@ def q2_5():
 
       def func(cx , cy , w, h):
         return {
-        "minX": float(cx - w/2) , 
-        "maxX": float(cx + w/2) ,
-        "minY": float(cy - h/2) ,
-        "maxY": float(cy + h/2)
+        "minX": float(cx - w/2)/224.0 , 
+        "maxX": float(cx + w/2)/224.0 ,
+        "minY": float(cy - h/2)/224.0 ,
+        "maxY": float(cy + h/2)/224.0
       }
 
 
@@ -988,6 +988,6 @@ if __name__ == "__main__":
   # sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
   # wandb.agent(sweep_id , function=q2_3)
 
-  q2_4()
+  # q2_4()
   q2_5()
-  q2_6()
+  # q2_6()
