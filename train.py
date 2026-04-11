@@ -536,7 +536,7 @@ def q2_2():
   test_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0003)
+  optimizer = optim.AdamW(model.parameters() , lr=0.01 , weight_decay=0.0001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_acc = 0.0 
@@ -659,7 +659,7 @@ def q2_3():
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.Adam(trainable_params, lr=0.0003)
+  optimizer = optim.AdamW(trainable_params, lr=0.01 , weight_decay=0.0001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_dice = 0.0 
