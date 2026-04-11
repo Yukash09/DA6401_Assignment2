@@ -498,9 +498,13 @@ def q2_1():
     handle.remove()
 
     flat_activations = activations[0][0].flatten()
+    sample_activations = np.random.choice(flat_activations , size=25000 , replace=False)
+
+    data = [[float(val)] for val in sample_activations] 
+    table = wandb.Table(data=data , columns=["Activations"])
 
     wandb.log({
-      "Conv3 activations": wandb.Histogram(flat_activations)
+      f"Conv3 activations for Batch Norm = {config.batch_norm}": wandb.plot.histogram(table , "Activations" , title="Conv3 activations") 
     })
 
   del model
