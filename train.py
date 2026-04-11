@@ -631,8 +631,9 @@ def q2_3():
   ).to(device)
 
 
-  gdown.download(id="1Gt7LkkLLBbEC42eL0acGmxtSxFSRwnmW" , output="./checkpoints/unet.pth") 
-  model.load_state_dict(torch.load("./checkpoints/unet.pth" , map_location=device , weights_only=False)['state_dict'])
+  gdown.download(id="1pDepwivDQjEqCAVAGQg1cNREYoQHLEIq" , output="./checkpoints/classifier.pth") 
+  model.load_pth("./checkpoints/classifier.pth" , device)
+  # model.load_state_dict(torch.load("./checkpoints/unet.pth" , map_location=device , weights_only=False)['state_dict'])
   
   if config.approach == "strict":
     for param in model.encoder.parameters():
@@ -663,12 +664,12 @@ def q2_3():
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.AdamW(trainable_params, lr=0.0001 , weight_decay=0.0001)
+  optimizer = optim.Adam(trainable_params, lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_dice = 0.0 
 
-  for epoch in range(10):
+  for epoch in range(15):
     
     print(f"Epoch: {epoch}")
     model.train()
