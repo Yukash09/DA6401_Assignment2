@@ -420,7 +420,7 @@ def q2_1():
   test_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters() , lr=0.0003)
+  optimizer = optim.Adam(model.parameters() , lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_acc = 0.0 
@@ -663,12 +663,12 @@ def q2_3():
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.Adam(trainable_params, lr=0.0002)
+  optimizer = optim.AdamW(trainable_params, lr=0.0001 , weight_decay=0.0001)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_dice = 0.0 
 
-  for epoch in range(30):
+  for epoch in range(10):
     
     print(f"Epoch: {epoch}")
     model.train()
@@ -984,14 +984,14 @@ if __name__ == "__main__":
   # torch.cuda.empty_cache()
   # segmentation(batch_norm=True , dropout=0.5)
 
-  sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
-  wandb.agent(sweep_id , function=q2_1)
+  # sweep_id = wandb.sweep(sweep_config1 , project="DA6401_Assignment2")
+  # wandb.agent(sweep_id , function=q2_1)
 
   # sweep_id = wandb.sweep(sweep_config2 , project="DA6401_Assignment2")
   # wandb.agent(sweep_id , function=q2_2)
 
-  # sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
-  # wandb.agent(sweep_id , function=q2_3)
+  sweep_id = wandb.sweep(sweep_config3 , project="DA6401_Assignment2")
+  wandb.agent(sweep_id , function=q2_3)
 
   # q2_4()
   # q2_5()
