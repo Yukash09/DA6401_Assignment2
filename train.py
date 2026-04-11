@@ -536,12 +536,12 @@ def q2_2():
   test_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
-  optimizer = optim.AdamW(model.parameters() , lr=0.01 , weight_decay=0.0001)
+  optimizer = optim.Adam(model.parameters() , lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_acc = 0.0 
 
-  for epoch in range(25):
+  for epoch in range(30):
 
     print(f"Epoch: {epoch}")
     model.train()
@@ -564,7 +564,7 @@ def q2_2():
       total_img += ids.size(0)
       correct_class += (predicted == ids).sum().item()
 
-      if (idx + 1) % 20 == 0:
+      if (idx + 1) % 40 == 0:
         print(f"Batch {idx}/{len(train_loader)} , Loss: {loss.item():.4f}")
 
     train_accuracy = correct_class/total_img * 100 
@@ -659,12 +659,12 @@ def q2_3():
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-  optimizer = optim.AdamW(trainable_params, lr=0.01 , weight_decay=0.0001)
+  optimizer = optim.Adam(trainable_params, lr=0.0002)
   scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max' , factor=0.5 , patience=3)
 
   # best_dice = 0.0 
 
-  for epoch in range(25):
+  for epoch in range(30):
     
     print(f"Epoch: {epoch}")
     model.train()
