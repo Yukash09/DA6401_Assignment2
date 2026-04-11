@@ -659,8 +659,8 @@ def q2_3():
 
   print(f"Training samples: {len(train_data)} and Validation samples:{len(val_data)}")
 
-  train_loader = DataLoader(train_data , batch_size=32 , shuffle=True)
-  val_loader = DataLoader(val_data , batch_size=32 , shuffle=False)
+  train_loader = DataLoader(train_data , batch_size=64 , shuffle=True)
+  val_loader = DataLoader(val_data , batch_size=64 , shuffle=False)
 
   loss_fn = nn.CrossEntropyLoss()
   trainable_params = filter(lambda p: p.requires_grad, model.parameters())
