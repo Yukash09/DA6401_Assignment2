@@ -615,7 +615,7 @@ sweep_config3 = {
   'method': 'grid',
   'metric': {'goal': 'maximize'} ,
   'parameters': {
-    'approach': {'values': ['strict' , 'partial' , 'full']}
+    'approach': {'values': ['full']}
   }
 }
 
