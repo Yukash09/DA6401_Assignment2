@@ -66,7 +66,7 @@ def inference():
     table = wandb.Table(columns)
 
     # Pre-downloaded from wikipaedia and some random site through google images section search bar
-    img1 = "./data/q7/1000203995.jpg"
+    img1 = "./data/q7/1000203998.jpg"
     img2 = "./data/q7/1000203996.jpg"
     img3 = "./data/q7/1000203997.jpg"
 
