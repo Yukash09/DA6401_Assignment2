@@ -66,9 +66,9 @@ def inference():
     table = wandb.Table(columns)
 
     # Pre-downloaded from wikipaedia and some random site through google images section search bar
-    img1 = "./data/q7/1000203998.jpg"
-    img2 = "./data/q7/1000203996.jpg"
-    img3 = "./data/q7/1000203997.jpg"
+    img1 = "./data/q7/1000206039.jpg"
+    img2 = "./data/q7/IMG_20260422_234342.jpg"
+    img3 = "./data/q7/IMG_20260422_233838.jpg"
 
     with torch.no_grad():
         wbimg1 , conf1 , pred1 = inf_help(img1 , transform , device , model , mapp) 
